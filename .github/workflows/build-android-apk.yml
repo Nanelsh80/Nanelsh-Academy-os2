@@ -17,7 +17,7 @@ jobs:
 
       - name: Extract final app source
         run: |
-          unzip -q NANELSH_Academy_OS_4.0.0_source.zip -d source
+          unzip -q NANELSH_Academy_OS_4.1.0_source.zip -d source
           cp -a source/nanelsh_260_clean/. .
 
       - name: Set up Node.js
@@ -46,7 +46,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.0.0-APK
+          name: NANELSH-Academy-OS-4.1.0-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
