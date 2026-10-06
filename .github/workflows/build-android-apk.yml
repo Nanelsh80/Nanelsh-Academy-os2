@@ -17,8 +17,15 @@ jobs:
 
       - name: Extract final app source
         run: |
-          unzip -q NANELSH_Academy_OS_4.2.1_source.zip -d source
-          cp -a source/nanelsh_260_clean/. .
+          unzip -q NANELSH_Academy_OS_4.3.0_FLAGSHIP_FINAL_source.zip -d source
+          cp -a source/flagship_final/. .
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          s = s.replace('versionCode 22', 'versionCode 26').replace('versionName "4.1.0"', 'versionName "4.3.0"')
+          p.write_text(s)
+          PY
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -46,7 +53,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.2.1-APK
+          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
