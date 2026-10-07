@@ -23,8 +23,14 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 26').replace('versionName "4.1.0"', 'versionName "4.3.0"')
+          s = s.replace('versionCode 22', 'versionCode 27').replace('versionName "4.1.0"', 'versionName "4.3.0"')
           p.write_text(s)
+
+          # Keep the in-app brand mark aligned with the new flagship launcher identity.
+          app = Path('App.tsx')
+          s = app.read_text()
+          s = s.replace('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
+          app.write_text(s)
           PY
 
       - name: Set up Node.js
@@ -53,7 +59,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-APK
+          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-ICON-FIX-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
