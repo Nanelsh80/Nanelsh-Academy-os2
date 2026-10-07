@@ -23,7 +23,7 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 29').replace('versionName "4.1.0"', 'versionName "4.3.1"')
+          s = s.replace('versionCode 22', 'versionCode 30').replace('versionName "4.1.0"', 'versionName "4.3.1"')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
@@ -47,6 +47,42 @@ jobs:
           s = s.replace(
               '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group") },',
               '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group"), primary: false },'
+          )
+
+          # Student archive is a reversible management action, so keep it neutral rather than destructive red.
+          s = s.replace(
+              'tone={item.active ? "danger" : "default"}',
+              'tone="default"'
+          )
+
+          # Give the Dashboard enough breathing room above the persistent bottom navigation.
+          s = s.replace(
+              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={styles.listContent}',
+              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={[styles.listContent, styles.dashboardListContent]}'
+          )
+
+          # Add subtle tactile scale feedback to the main navigation.
+          s = s.replace(
+              '[styles.tabItem, pressed && { opacity: 0.7 }]',
+              '[styles.tabItem, pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] }]'
+          )
+
+          # Slightly strengthen the tactile response on More-sheet actions.
+          s = s.replace(
+              'pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
+              'pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }'
+          )
+
+          # Subtle tactile feedback for icon actions without changing their meaning or tone.
+          s = s.replace(
+              'pressed && { opacity: 0.7 },\n      ]}\n    >\n      <MaterialIcons name={icon}',
+              'pressed && { opacity: 0.7, transform: [{ scale: 0.94 }] },\n      ]}\n    >\n      <MaterialIcons name={icon}'
+          )
+
+          # Final Dashboard spacing refinement.
+          s = s.replace(
+              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34, gap: 12, flexGrow: 1 },',
+              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34, gap: 12, flexGrow: 1 }, dashboardListContent: { paddingBottom: 112 },'
           )
           s = s.replace(
               'styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
