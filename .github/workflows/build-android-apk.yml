@@ -23,7 +23,7 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 28').replace('versionName "4.1.0"', 'versionName "4.3.0"')
+          s = s.replace('versionCode 22', 'undefined').replace('versionName "4.3.1"', 'versionCode 29')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
@@ -31,7 +31,7 @@ jobs:
           s = app.read_text()
           s = s.replace('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
 
-          # Flagship dashboard polish: emphasize the primary action and reduce bottom-nav density.
+          # Final premium polish: preserve functionality, refine archive tone, spacing, and interaction feel.
           s = s.replace(
               '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session") },',
               '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session"), primary: true },'
@@ -50,7 +50,7 @@ jobs:
           )
           s = s.replace(
               'styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
-              'styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }'
+              'styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }'
           )
           s = s.replace(
               '<View style={styles.quickActionIcon}><MaterialIcons name={item.icon} size={21} color={COLORS.primaryDeep} /></View>',
@@ -109,7 +109,7 @@ jobs:
           node-version: 22
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -129,7 +129,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-POLISH-APK
+          name: NANELSH-Academy-OS-4.3.1-FINAL-PREMIUM-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
