@@ -23,13 +23,83 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 27').replace('versionName "4.1.0"', 'versionName "4.3.0"')
+          s = s.replace('versionCode 22', 'versionCode 28').replace('versionName "4.1.0"', 'versionName "4.3.0"')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
           app = Path('App.tsx')
           s = app.read_text()
           s = s.replace('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
+
+          # Flagship dashboard polish: emphasize the primary action and reduce bottom-nav density.
+          s = s.replace(
+              '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session") },',
+              '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session"), primary: true },'
+          )
+          s = s.replace(
+              '{ label: "طالبة", icon: "person-add-alt-1" as IconName, action: () => onOpen("student") },',
+              '{ label: "طالبة", icon: "person-add-alt-1" as IconName, action: () => onOpen("student"), primary: false },'
+          )
+          s = s.replace(
+              '{ label: "دفعة", icon: "payments" as IconName, action: () => onOpen("finance") },',
+              '{ label: "دفعة", icon: "payments" as IconName, action: () => onOpen("finance"), primary: false },'
+          )
+          s = s.replace(
+              '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group") },',
+              '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group"), primary: false },'
+          )
+          s = s.replace(
+              'styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
+              'styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }'
+          )
+          s = s.replace(
+              '<View style={styles.quickActionIcon}><MaterialIcons name={item.icon} size={21} color={COLORS.primaryDeep} /></View>',
+              '<View style={[styles.quickActionIcon, item.primary && styles.quickActionIconPrimary]}><MaterialIcons name={item.icon} size={21} color={item.primary ? COLORS.surface : COLORS.primaryDeep} /></View>'
+          )
+          s = s.replace(
+              '<Text style={styles.quickActionText}>إضافة {item.label}</Text>',
+              '<Text style={[styles.quickActionText, item.primary && styles.quickActionTextPrimary]}>إضافة {item.label}</Text>'
+          )
+          s = s.replace(
+              'TABS.filter(tab => ["home", "students", "sessions", "groups", "finance"].includes(tab.key))',
+              'TABS.filter(tab => ["home", "students", "sessions", "finance"].includes(tab.key))'
+          )
+          s = s.replace(
+              '[{ key: "content" as Tab, title: "المحتوى", icon: "menu-book" as IconName }, { key: "assessment" as Tab, title: "التقييم", icon: "assessment" as IconName }, { key: "settings" as Tab, title: "الإعدادات", icon: "tune" as IconName }]',
+              '[{ key: "groups" as Tab, title: "المجموعات", icon: "groups" as IconName }, { key: "content" as Tab, title: "المحتوى", icon: "menu-book" as IconName }, { key: "assessment" as Tab, title: "التقييم", icon: "assessment" as IconName }, { key: "settings" as Tab, title: "الإعدادات", icon: "tune" as IconName }]'
+          )
+          s = s.replace(
+              'quickAction: { flex: 1, minHeight: 68,',
+              'quickAction: { flex: 1, minHeight: 68,'
+          )
+          s = s.replace(
+              'quickActionIcon: { width: 31, height: 31,',
+              'quickActionIcon: { width: 31, height: 31,'
+          )
+          s = s.replace(
+              'quickActionText: { color: COLORS.primaryDeep,',
+              'quickActionText: { color: COLORS.primaryDeep,'
+          )
+          s = s.replace(
+              'moreGrid: { flexDirection: "row-reverse", gap: 9 }',
+              'moreGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 9 }'
+          )
+          s = s.replace(
+              'moreItem: { flex: 1, minHeight: 82,',
+              'moreItem: { width: "48%", minHeight: 82,'
+          )
+          s = s.replace(
+              'quickActionText: { color: COLORS.primaryDeep, fontSize: 9, fontWeight: "800", textAlign: "center", writingDirection: "rtl" },',
+              'quickActionText: { color: COLORS.primaryDeep, fontSize: 9, fontWeight: "800", textAlign: "center", writingDirection: "rtl" }, quickActionTextPrimary: { color: COLORS.surface, fontWeight: "900" },'
+          )
+          s = s.replace(
+              'quickActionIcon: { width: 31, height: 31, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },',
+              'quickActionIcon: { width: 31, height: 31, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border }, quickActionIconPrimary: { backgroundColor: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.22)" },'
+          )
+          s = s.replace(
+              'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 },',
+              'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 }, quickActionPrimary: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },'
+          )
           app.write_text(s)
           PY
 
@@ -59,7 +129,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-ICON-FIX-APK
+          name: NANELSH-Academy-OS-4.3.0-FLAGSHIP-POLISH-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
