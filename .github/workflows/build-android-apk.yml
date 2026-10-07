@@ -136,6 +136,30 @@ jobs:
               'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 },',
               'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 }, quickActionPrimary: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },'
           )
+
+          # Final visual polish: archive is a neutral management action, not a destructive delete action.
+          s = s.replace(
+              'tone={item.active ? "danger" : "default"}',
+              'tone="default"'
+          )
+          s = s.replace(
+              'tone={item.active === 0 ? "default" : "danger"}',
+              'tone="default"'
+          )
+          # Give the dashboard pulse and scroll content a little more breathing room.
+          s = s.replace(
+              'flagshipPulse: { backgroundColor: COLORS.surface, borderRadius: 23, borderWidth: 1, borderColor: COLORS.border, padding: 14, marginBottom: 2,',
+              'flagshipPulse: { backgroundColor: COLORS.surface, borderRadius: 23, borderWidth: 1, borderColor: COLORS.border, padding: 14, marginBottom: 12,'
+          )
+          s = s.replace(
+              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34,',
+              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 46,'
+          )
+          # Slightly stronger tactile response while keeping the motion restrained.
+          s = s.replace(
+              'transform: [{ scale: 0.98 }] }',
+              'transform: [{ scale: 0.97 }] }'
+          )
           app.write_text(s)
           PY
 
