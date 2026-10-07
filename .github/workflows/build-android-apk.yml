@@ -29,7 +29,7 @@ jobs:
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
           app = Path('App.tsx')
           s = app.read_text()
-          s = s.replace('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
+          s = s.replaceAll('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
 
           # Final premium polish: preserve functionality, refine archive tone, spacing, and interaction feel.
           s = s.replace(
@@ -51,7 +51,7 @@ jobs:
 
           # Student archive is a reversible management action, so keep it neutral rather than destructive red.
           s = s.replace(
-              'tone={item.active ? "danger" : "default"}',
+              'tone="default"',
               'tone="default"'
           )
 
@@ -81,7 +81,7 @@ jobs:
 
           # Final Dashboard spacing refinement.
           s = s.replace(
-              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34, gap: 12, flexGrow: 1 },',
+              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 46, gap: 13, flexGrow: 1 },',
               'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34, gap: 12, flexGrow: 1 }, dashboardListContent: { paddingBottom: 112 },'
           )
           s = s.replace(
