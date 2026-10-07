@@ -172,6 +172,20 @@ jobs:
           app.write_text(s)
           PY
 
+      - name: Inspect extracted source
+        run: |
+          mkdir -p source-inspection
+          cp App.tsx source-inspection/App.tsx
+          cp package.json source-inspection/package.json
+          find src -maxdepth 2 -type f 2>/dev/null | sort > source-inspection/src-files.txt || true
+
+      - name: Upload source inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: NANELSH-source-inspection
+          path: source-inspection
+          retention-days: 1
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
