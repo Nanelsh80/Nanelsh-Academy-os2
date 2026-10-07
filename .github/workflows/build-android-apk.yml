@@ -37,7 +37,7 @@ jobs:
           )
           s = s.replace(
               'onPress={() => { haptic(); item.action(); }}',
-              'onPress={() => { if (item.primary) hapticPrimary(); else haptic(); item.action(); }}'
+              'onPress={() => { haptic(); item.action(); }}'
           )
 
           # Final premium polish: preserve functionality, refine archive tone, spacing, and interaction feel.
@@ -67,7 +67,7 @@ jobs:
           # Give the Dashboard enough breathing room above the persistent bottom navigation.
           s = s.replace(
               'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={styles.listContent}',
-              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={[styles.listContent, styles.dashboardListContent]}'
+              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={styles.listContent}'
           )
 
           # Add subtle tactile scale feedback to the main navigation.
