@@ -23,13 +23,22 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 30').replace('versionName "4.1.0"', 'versionName "4.3.1"')
+          s = s.replace('versionCode 22', 'versionCode 31').replace('versionName "4.1.0"', 'versionName "4.3.1"')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
           app = Path('App.tsx')
           s = app.read_text()
           s = s.replaceAll('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
+          # Primary actions get a slightly stronger haptic response.
+          s = s.replace(
+              'function haptic() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);\\n}',
+              'function haptic() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);\\n}\\n\\nfunction hapticPrimary() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);\\n}'
+          )
+          s = s.replace(
+              'onPress={() => { haptic(); item.action(); }}',
+              'onPress={() => { if (item.primary) hapticPrimary(); else haptic(); item.action(); }}'
+          )
 
           # Final premium polish: preserve functionality, refine archive tone, spacing, and interaction feel.
           s = s.replace(
