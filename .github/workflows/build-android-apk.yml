@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip'
+      - 'scripts/apply_final_visual_skin.py'
       - '.github/workflows/build-android-apk.yml'
 
 permissions:
@@ -24,14 +25,12 @@ jobs:
           rm -rf source
           mkdir -p source
           unzip -q NANELSH-Academy-OS-Manus-2.2-Final-Master.zip -d source
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name '.git' \
-            ! -name '.github' \
-            ! -name 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip' \
-            ! -name 'source' \
-            -exec rm -rf {} +
+          find . -mindepth 1 -maxdepth 1             ! -name '.git'             ! -name '.github'             ! -name 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip'             ! -name 'source'             -exec rm -rf {} +
           cp -a source/. .
           rm -rf source
+
+      - name: Apply final NANELSH visual skin
+        run: python3 scripts/apply_final_visual_skin.py
 
       - name: Verify Expo project
         run: |
@@ -70,7 +69,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-Final-Master-APK
+          name: NANELSH-Academy-OS-Final-Visual-3D-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
