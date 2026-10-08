@@ -7,6 +7,7 @@ s=s.replace('  successSoft: "#E7F0EA",\n};','  successSoft: "#E7F0EA",\n  terrac
 
 # Brand voice
 s=s.replace("NANELSH · SIGNATURE ACADEMY OS","NANELSH · MY ACADEMY")
+s=s.replace("NANELSH · FLAGSHIP OS","NANELSH · MY ACADEMY")
 s=s.replace("هوية ذكية لإدارة أكاديميتك بكل أناقة","علوم · طلاب · حصص · أكاديمية")
 
 # Make the session action the visual anchor
@@ -24,6 +25,8 @@ s=s.replace(anchor,insert,1)
 old='<Pressable key={item.label} accessibilityRole="button" accessibilityLabel={`إضافة ${item.label}`} onPress={() => { haptic(); item.action(); }} style={({ pressed }) => [styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }]}><View style={styles.quickActionIcon}><MaterialIcons name={item.icon} size={21} color={COLORS.primaryDeep} /></View><Text style={styles.quickActionText}>إضافة {item.label}</Text></Pressable>'
 new='<Pressable key={item.label} accessibilityRole="button" accessibilityLabel={`إضافة ${item.label}`} onPress={() => { haptic(); item.action(); }} style={({ pressed }) => [styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }]}><View style={[styles.quickActionIcon, item.primary && styles.quickActionIconPrimary]}><MaterialIcons name={item.icon} size={21} color={item.primary ? COLORS.surface : COLORS.primaryDeep} /></View><Text style={[styles.quickActionText, item.primary && styles.quickActionTextPrimary]}>إضافة {item.label}</Text></Pressable>'
 s=s.replace(old,new,1)
+# Support the already-polished source variant as well.
+s=s.replace('style={({ pressed }) => [styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }]}>', 'style={({ pressed }) => [styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }]}>', 1)
 
 # Editorial language
 s=s.replace('FLAGSHIP PULSE</Text>','NANELSH TODAY</Text>',1)
