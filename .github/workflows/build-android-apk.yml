@@ -75,7 +75,7 @@ jobs:
           cp assets/nanelsh-app-icon.png assets/icon.png
           convert -background none /tmp/nanelsh-icon.svg -resize 256x256 assets/favicon.png
           convert -size 1024x1024 xc:'#F4EBDD' assets/android-icon-background.png
-          convert -background none /tmp/nanelsh-foreground.svg -resize 760x760 assets/android-icon-foreground.png
+          convert -background none /tmp/nanelsh-foreground.svg -resize 760x760 -gravity center -extent 1024x1024 assets/android-icon-foreground.png
           convert assets/android-icon-foreground.png -colorspace Gray assets/android-icon-monochrome.png
           python3 - <<'PY'
           import json
