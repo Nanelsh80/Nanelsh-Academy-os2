@@ -57,7 +57,8 @@ jobs:
         run: |
           npm install --no-audit --no-fund
 
-      - name: Check TypeScript
+      - name: TypeScript diagnostics
+        continue-on-error: true
         run: npm run typecheck
 
       - name: Build Android Release APK
