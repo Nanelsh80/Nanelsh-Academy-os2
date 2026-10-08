@@ -23,7 +23,7 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 33').replace('versionName "5.0.0"', 'versionName "4.4.0"')
+          s = s.replace('versionCode 22', 'versionCode 33').replace('versionName "5.0.0"', 'versionName "5.0.0"')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
