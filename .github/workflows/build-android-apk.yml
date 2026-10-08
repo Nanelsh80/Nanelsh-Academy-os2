@@ -175,6 +175,14 @@ jobs:
           app.write_text(s)
           PY
 
+      - name: Save extracted App source for verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: NANELSH-extracted-App-source
+          path: App.tsx
+          retention-days: 2
+          if-no-files-found: error
+
       - name: Build Student Command Center
         run: python3 scripts/patch_student_command_center.py
 
