@@ -23,7 +23,7 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 32').replace('versionName "4.1.0"', 'versionName "4.4.0"')
+          s = s.replace('versionCode 22', 'versionCode 33').replace('versionName "5.0.0"', 'versionName "4.4.0"')
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
@@ -172,7 +172,10 @@ jobs:
           app.write_text(s)
           PY
 
-      - name: Build Student Command Center\n        run: python3 scripts/patch_student_command_center.py\n\n      - name: Set up Node.js
+      - name: Build Student Command Center\n        run: python3 scripts/patch_student_command_center.py\n\n      - name: Apply NANELSH Signature visual identity
+        run: python3 scripts/patch_signature_identity.py
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -198,7 +201,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-4.4.0-STUDENT-COMMAND-CENTER-APK
+          name: NANELSH-Academy-OS-5.0.0-SIGNATURE-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
