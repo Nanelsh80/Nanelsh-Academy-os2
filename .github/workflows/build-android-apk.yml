@@ -1,8 +1,11 @@
-name: Build Android APK
+name: Build NANELSH Final Master APK
 
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip'
+      - '.github/workflows/build-android-apk.yml'
 
 permissions:
   contents: read
@@ -16,200 +19,33 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Extract final app source
+      - name: Extract Final Master
         run: |
-          unzip -q NANELSH_Academy_OS_4.3.0_FLAGSHIP_FINAL_source.zip -d source
-          cp -a source/flagship_final/. .
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('android/app/build.gradle')
-          s = p.read_text()
-          import re
-          s = re.sub(r'versionCode\\s+\\d+', 'versionCode 33', s)
-          s = re.sub(r'versionName\\s+"[^"]+"', 'versionName "5.0.0"', s)
-          p.write_text(s)
+          rm -rf source
+          mkdir -p source
+          unzip -q NANELSH-Academy-OS-Manus-2.2-Final-Master.zip -d source
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name '.github' \
+            ! -name 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip' \
+            ! -name 'source' \
+            -exec rm -rf {} +
+          cp -a source/. .
+          rm -rf source
 
-          # Keep the in-app brand mark aligned with the new flagship launcher identity.
-          app = Path('App.tsx')
-          s = app.read_text()
-          s = s.replace('require("./assets/icon.png")', 'require("./assets/android-icon-foreground.png")')
-          # Primary actions get a slightly stronger haptic response.
-          s = s.replace(
-              'function haptic() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);\\n}',
-              'function haptic() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);\\n}\\n\\nfunction hapticPrimary() {\\n  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);\\n}'
-          )
-          s = s.replace(
-              'onPress={() => { haptic(); item.action(); }}',
-              'onPress={() => { haptic(); item.action(); }}'
-          )
-
-          # Final premium polish: preserve functionality, refine archive tone, spacing, and interaction feel.
-          s = s.replace(
-              '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session") },',
-              '{ label: "حصة", icon: "add-circle-outline" as IconName, action: () => onOpen("session"), primary: true },'
-          )
-          s = s.replace(
-              '{ label: "طالبة", icon: "person-add-alt-1" as IconName, action: () => onOpen("student") },',
-              '{ label: "طالبة", icon: "person-add-alt-1" as IconName, action: () => onOpen("student"), primary: false },'
-          )
-          s = s.replace(
-              '{ label: "دفعة", icon: "payments" as IconName, action: () => onOpen("finance") },',
-              '{ label: "دفعة", icon: "payments" as IconName, action: () => onOpen("finance"), primary: false },'
-          )
-          s = s.replace(
-              '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group") },',
-              '{ label: "مجموعة", icon: "groups" as IconName, action: () => onOpen("group"), primary: false },'
-          )
-
-          # Student archive is a reversible management action, so keep it neutral rather than destructive red.
-          s = s.replace(
-              'tone="default"',
-              'tone="default"'
-          )
-
-          # Give the Dashboard enough breathing room above the persistent bottom navigation.
-          s = s.replace(
-              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={styles.listContent}',
-              'data={upcoming}\n      keyExtractor={item => String(item.id)}\n      contentContainerStyle={styles.listContent}'
-          )
-
-          # Add subtle tactile scale feedback to the main navigation.
-          s = s.replace(
-              '[styles.tabItem, pressed && { opacity: 0.7 }]',
-              '[styles.tabItem, pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] }]'
-          )
-
-          # Slightly strengthen the tactile response on More-sheet actions.
-          s = s.replace(
-              'pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
-              'pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }'
-          )
-
-          # Subtle tactile feedback for icon actions without changing their meaning or tone.
-          s = s.replace(
-              'pressed && { opacity: 0.7 },\n      ]}\n    >\n      <MaterialIcons name={icon}',
-              'pressed && { opacity: 0.7, transform: [{ scale: 0.94 }] },\n      ]}\n    >\n      <MaterialIcons name={icon}'
-          )
-
-          # Final Dashboard spacing refinement.
-          s = s.replace(
-              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 46, gap: 13, flexGrow: 1 },',
-              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34, gap: 12, flexGrow: 1 }, dashboardListContent: { paddingBottom: 112 },'
-          )
-          s = s.replace(
-              'styles.quickAction, pressed && { opacity: 0.72, transform: [{ scale: 0.98 }] }',
-              'styles.quickAction, item.primary && styles.quickActionPrimary, pressed && { opacity: 0.72, transform: [{ scale: 0.97 }] }'
-          )
-          s = s.replace(
-              '<View style={styles.quickActionIcon}><MaterialIcons name={item.icon} size={21} color={COLORS.primaryDeep} /></View>',
-              '<View style={[styles.quickActionIcon, item.primary && styles.quickActionIconPrimary]}><MaterialIcons name={item.icon} size={21} color={item.primary ? COLORS.surface : COLORS.primaryDeep} /></View>'
-          )
-          s = s.replace(
-              '<Text style={styles.quickActionText}>إضافة {item.label}</Text>',
-              '<Text style={[styles.quickActionText, item.primary && styles.quickActionTextPrimary]}>إضافة {item.label}</Text>'
-          )
-          s = s.replace(
-              'TABS.filter(tab => ["home", "students", "sessions", "groups", "finance"].includes(tab.key))',
-              'TABS.filter(tab => ["home", "students", "sessions", "finance"].includes(tab.key))'
-          )
-          s = s.replace(
-              '[{ key: "content" as Tab, title: "المحتوى", icon: "menu-book" as IconName }, { key: "assessment" as Tab, title: "التقييم", icon: "assessment" as IconName }, { key: "settings" as Tab, title: "الإعدادات", icon: "tune" as IconName }]',
-              '[{ key: "groups" as Tab, title: "المجموعات", icon: "groups" as IconName }, { key: "content" as Tab, title: "المحتوى", icon: "menu-book" as IconName }, { key: "assessment" as Tab, title: "التقييم", icon: "assessment" as IconName }, { key: "settings" as Tab, title: "الإعدادات", icon: "tune" as IconName }]'
-          )
-          s = s.replace(
-              'quickAction: { flex: 1, minHeight: 68,',
-              'quickAction: { flex: 1, minHeight: 68,'
-          )
-          s = s.replace(
-              'quickActionIcon: { width: 31, height: 31,',
-              'quickActionIcon: { width: 31, height: 31,'
-          )
-          s = s.replace(
-              'quickActionText: { color: COLORS.primaryDeep,',
-              'quickActionText: { color: COLORS.primaryDeep,'
-          )
-          s = s.replace(
-              'moreGrid: { flexDirection: "row-reverse", gap: 9 }',
-              'moreGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 9 }'
-          )
-          s = s.replace(
-              'moreItem: { flex: 1, minHeight: 82,',
-              'moreItem: { width: "48%", minHeight: 82,'
-          )
-          s = s.replace(
-              'quickActionText: { color: COLORS.primaryDeep, fontSize: 9, fontWeight: "800", textAlign: "center", writingDirection: "rtl" },',
-              'quickActionText: { color: COLORS.primaryDeep, fontSize: 9, fontWeight: "800", textAlign: "center", writingDirection: "rtl" }, quickActionTextPrimary: { color: COLORS.surface, fontWeight: "900" },'
-          )
-          s = s.replace(
-              'quickActionIcon: { width: 31, height: 31, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },',
-              'quickActionIcon: { width: 31, height: 31, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border }, quickActionIconPrimary: { backgroundColor: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.22)" },'
-          )
-          s = s.replace(
-              'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 },',
-              'quickAction: { flex: 1, minHeight: 68, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: COLORS.sageSoft, borderWidth: 1, borderColor: "#E1EAE4", gap: 5 }, quickActionPrimary: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },'
-          )
-
-          # Final visual polish: archive is a neutral management action, not a destructive delete action.
-          s = s.replace(
-              'tone={item.active ? "danger" : "default"}',
-              'tone="default"'
-          )
-          s = s.replace(
-              'tone={item.active === 0 ? "default" : "danger"}',
-              'tone="default"'
-          )
-          # Give the dashboard pulse and scroll content a little more breathing room.
-          s = s.replace(
-              'flagshipPulse: { backgroundColor: COLORS.surface, borderRadius: 23, borderWidth: 1, borderColor: COLORS.border, padding: 14, marginBottom: 2,',
-              'flagshipPulse: { backgroundColor: COLORS.surface, borderRadius: 23, borderWidth: 1, borderColor: COLORS.border, padding: 14, marginBottom: 12,'
-          )
-          s = s.replace(
-              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 34,',
-              'listContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 46,'
-          )
-          # Slightly stronger tactile response while keeping the motion restrained.
-          s = s.replace(
-              'transform: [{ scale: 0.98 }] }',
-              'transform: [{ scale: 0.97 }] }'
-          )
-          app.write_text(s)
-          PY
-
-      - name: Save extracted App source for verification
-        uses: actions/upload-artifact@v4
-        with:
-          name: NANELSH-extracted-App-source
-          path: App.tsx
-          retention-days: 2
-          if-no-files-found: error
-
-      - name: Apply NANELSH design patches
+      - name: Verify Expo project
         run: |
-          set +e
-          python3 scripts/patch_student_command_center.py 2>&1 | tee student_patch.log
-          student_status=${PIPESTATUS[0]}
-          python3 scripts/patch_nanelsh_rebrand.py 2>&1 | tee rebrand_patch.log
-          rebrand_status=${PIPESTATUS[0]}
-          echo "student_status=${student_status}"
-          echo "rebrand_status=${rebrand_status}"
-          if [ "${student_status}" -ne 0 ] || [ "${rebrand_status}" -ne 0 ]; then exit 1; fi
-
-      - name: Save patch diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: NANELSH-patch-diagnostics
-          path: |
-            student_patch.log
-            rebrand_patch.log
-            App.tsx
-          retention-days: 2
-          if-no-files-found: warn
+          test -f package.json
+          test -f App.tsx
+          test -f eas.json
+          test -d android
+          node -e "const p=require('./package.json'); console.log('name=',p.name); console.log('version=',p.version);"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -221,32 +57,18 @@ jobs:
         run: npm ci
 
       - name: Check TypeScript
-        run: |
-          set +e
-          npm run typecheck 2>&1 | tee typecheck.log
-          status=${PIPESTATUS[0]}
-          echo "typecheck_status=${status}"
-          exit ${status}
+        run: npm run typecheck
 
-      - name: Save typecheck diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: NANELSH-typecheck-diagnostics
-          path: typecheck.log
-          retention-days: 2
-          if-no-files-found: warn
-
-      - name: Build APK
+      - name: Build Android Release APK
         run: |
           chmod +x android/gradlew
           cd android
           ./gradlew --no-daemon assembleRelease
 
-      - name: Save APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NANELSH-Academy-OS-5.0.0-SIGNATURE-APK
+          name: NANELSH-Academy-OS-Final-Master-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
