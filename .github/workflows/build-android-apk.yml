@@ -20,6 +20,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Preserve visual skin script
+        run: cp scripts/apply_final_visual_skin.py /tmp/apply_final_visual_skin.py
+
       - name: Extract Final Master
         run: |
           rm -rf source
@@ -28,6 +31,8 @@ jobs:
           find . -mindepth 1 -maxdepth 1             ! -name '.git'             ! -name '.github'             ! -name 'NANELSH-Academy-OS-Manus-2.2-Final-Master.zip'             ! -name 'source'             -exec rm -rf {} +
           cp -a source/. .
           rm -rf source
+          mkdir -p scripts
+          cp /tmp/apply_final_visual_skin.py scripts/apply_final_visual_skin.py
 
       - name: Apply final NANELSH visual skin
         run: python3 scripts/apply_final_visual_skin.py
