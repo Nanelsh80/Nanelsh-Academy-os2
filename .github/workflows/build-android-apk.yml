@@ -37,6 +37,56 @@ jobs:
       - name: Apply final NANELSH visual skin
         run: python3 scripts/apply_final_visual_skin.py
 
+      - name: Apply final launcher icon
+        run: |
+          cat > /tmp/nanelsh-icon.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFDF8"/><stop offset="1" stop-color="#F1E6D5"/></linearGradient>
+            <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F817C"/><stop offset="1" stop-color="#0F5F5B"/></linearGradient>
+            <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F1D58A"/><stop offset="1" stop-color="#B9872F"/></linearGradient>
+          </defs>
+          <rect x="34" y="34" width="956" height="956" rx="220" fill="url(#bg)" stroke="url(#gold)" stroke-width="18"/>
+          <rect x="58" y="58" width="908" height="908" rx="198" fill="none" stroke="#D4A84A" stroke-opacity=".35" stroke-width="4"/>
+          <path d="M250 735V270h112l255 282V270h118v465H623L368 455v280z" fill="url(#teal)" stroke="url(#gold)" stroke-width="14" stroke-linejoin="round"/>
+          <path d="M332 324 C470 410 470 510 332 596 C470 682 470 746 332 810" fill="none" stroke="url(#gold)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M408 324 C270 410 270 510 408 596 C270 682 270 746 408 810" fill="none" stroke="#E8EFEA" stroke-width="18" stroke-linecap="round"/>
+          <g stroke="#D4A84A" stroke-width="10" stroke-linecap="round"><path d="M330 362h78"/><path d="M306 420h124"/><path d="M300 482h136"/><path d="M308 544h120"/><path d="M326 606h84"/><path d="M306 670h124"/><path d="M300 732h136"/></g>
+          <path d="M586 205 L805 275 L586 345 L367 275 Z" fill="url(#teal)" stroke="url(#gold)" stroke-width="12" stroke-linejoin="round"/>
+          <path d="M635 340v62c0 55-98 70-98 0v-62" fill="#174E4B" stroke="#D4A84A" stroke-width="10"/>
+          <path d="M805 275v105" stroke="#D4A84A" stroke-width="10"/><circle cx="805" cy="388" r="16" fill="#D4A84A"/><path d="M805 404c0 45-30 67-30 67" fill="none" stroke="#D4A84A" stroke-width="8"/>
+          <g fill="#94A79A" stroke="#0F5F5B" stroke-width="6"><path d="M180 670c-80-60-104-145-26-186 55 40 65 105 26 186z"/><path d="M216 732c-45-75-29-135 42-145 27 51 11 103-42 145z"/><path d="M822 660c80-60 104-145 26-186-55 40-65 105-26 186z"/><path d="M786 724c45-75 29-135-42-145-27 51-11 103 42 145z"/></g>
+          <g stroke="#D4A84A" stroke-width="7" fill="none" opacity=".8"><path d="M180 670C230 590 260 500 270 400"/><path d="M822 660C772 580 742 500 732 400"/></g>
+          <path d="M256 792 Q365 750 512 820 Q659 750 768 792 L768 904 Q655 860 512 915 Q369 860 256 904 Z" fill="#FFFDF8" stroke="url(#gold)" stroke-width="12"/>
+          <path d="M512 820v95" stroke="#D4A84A" stroke-width="8"/>
+          <path d="M286 815q112-35 198 18M286 850q112-35 198 18M738 815q-112-35-198 18M738 850q-112-35-198 18" fill="none" stroke="#B7C8BE" stroke-width="7"/>
+          </svg>
+          SVG
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("/tmp/nanelsh-icon.svg")
+          s=p.read_text()
+          s=s.replace('<rect x="34" y="34" width="956" height="956" rx="220" fill="url(#bg)" stroke="url(#gold)" stroke-width="18"/>','')
+          s=s.replace('<rect x="58" y="58" width="908" height="908" rx="198" fill="none" stroke="#D4A84A" stroke-opacity=".35" stroke-width="4"/>','')
+          Path("/tmp/nanelsh-foreground.svg").write_text(s)
+          PY
+          mkdir -p assets
+          convert -background none /tmp/nanelsh-icon.svg -resize 1024x1024 assets/nanelsh-app-icon.png
+          cp assets/nanelsh-app-icon.png assets/icon.png
+          convert -background none /tmp/nanelsh-icon.svg -resize 256x256 assets/favicon.png
+          convert -size 1024x1024 xc:'#F4EBDD' assets/android-icon-background.png
+          convert -background none /tmp/nanelsh-foreground.svg -resize 760x760 assets/android-icon-foreground.png
+          convert assets/android-icon-foreground.png -colorspace Gray assets/android-icon-monochrome.png
+          python3 - <<'PY'
+          import json
+          p='app.json'
+          d=json.load(open(p))
+          d['expo']['version']='2.3.1'
+          d['expo']['android']['versionCode']=8
+          d['expo']['android']['adaptiveIcon']['backgroundColor']='#F4EBDD'
+          open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+          PY
+
       - name: Fix bottom navigation safe area
         run: |
           python3 - <<'PY'
