@@ -173,7 +173,7 @@ jobs:
           PY
 
       - name: Build Student Command Center\n        run: python3 scripts/patch_student_command_center.py\n\n      - name: Apply NANELSH Signature visual identity
-        run: python3 scripts/patch_signature_identity.py
+        run: python3 scripts/patch_nanelsh_rebrand.py
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
