@@ -37,6 +37,40 @@ jobs:
       - name: Apply final NANELSH visual skin
         run: python3 scripts/apply_final_visual_skin.py
 
+      - name: Fix bottom navigation safe area
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("App.tsx")
+          s = p.read_text()
+          s = s.replace(
+              'import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";',
+              'import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";'
+          )
+          s = s.replace(
+              'function MainApp() {\n',
+              'function MainApp() {\n  const insets = useSafeAreaInsets();\n',
+              1
+          )
+          s = s.replace(
+              '<View style={styles.tabBar}>',
+              '<View style={[styles.tabBar, { paddingBottom: Math.max(12, insets.bottom + 8), minHeight: 92 + insets.bottom }]}>'
+          )
+          s = s.replace(
+              'tabBar: { flexDirection: "row-reverse", minHeight: 78, paddingHorizontal: 4, paddingTop: 7, paddingBottom: 8, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: "space-around", shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 },',
+              'tabBar: { flexDirection: "row-reverse", minHeight: 92, paddingHorizontal: 4, paddingTop: 5, paddingBottom: 12, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: "space-around", shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 },'
+          )
+          s = s.replace(
+              'tabItem: { alignItems: "center", justifyContent: "center", flex: 1, minWidth: 40, gap: 3 },',
+              'tabItem: { alignItems: "center", justifyContent: "flex-start", flex: 1, minWidth: 40, paddingTop: 1, gap: 4 },'
+          )
+          s = s.replace(
+              'tabText: { color: COLORS.muted, fontSize: 8, fontWeight: "700" }, tabTextSelected: { color: COLORS.primaryDeep },',
+              'tabText: { color: COLORS.muted, fontSize: 9, fontWeight: "700", lineHeight: 13, textAlign: "center" }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
+          )
+          p.write_text(s)
+          PY
+
       - name: Verify Expo project
         run: |
           test -f package.json
