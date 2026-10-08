@@ -2,6 +2,7 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
 
 permissions:
   contents: read
@@ -23,7 +24,9 @@ jobs:
           from pathlib import Path
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s = s.replace('versionCode 22', 'versionCode 33').replace('versionName "5.0.0"', 'versionName "5.0.0"')
+          import re
+          s = re.sub(r'versionCode\\s+\\d+', 'versionCode 33', s)
+          s = re.sub(r'versionName\\s+"[^"]+"', 'versionName "5.0.0"', s)
           p.write_text(s)
 
           # Keep the in-app brand mark aligned with the new flagship launcher identity.
@@ -172,7 +175,10 @@ jobs:
           app.write_text(s)
           PY
 
-      - name: Build Student Command Center\n        run: python3 scripts/patch_student_command_center.py\n\n      - name: Apply NANELSH Signature visual identity
+      - name: Build Student Command Center
+        run: python3 scripts/patch_student_command_center.py
+
+      - name: Apply NANELSH Signature visual identity
         run: python3 scripts/patch_nanelsh_rebrand.py
 
       - name: Set up Node.js
