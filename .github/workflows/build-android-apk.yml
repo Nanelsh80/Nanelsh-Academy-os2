@@ -121,6 +121,30 @@ jobs:
           p.write_text(s)
           PY
 
+      - name: Fix student save binding
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("src/data/store.ts")
+          s = p.read_text()
+          old = '''    input.totalSessions ?? 0,
+    input.completedSessions ?? 0,
+    input.remainingSessions ?? input.totalSessions ?? 0,
+    input.lastNotes?.trim() || null,
+    createdAt()
+'''
+          new = '''    input.totalSessions ?? 0,
+    input.completedSessions ?? 0,
+    input.remainingSessions ?? input.totalSessions ?? 0,
+    input.lastNotes?.trim() || null,
+    1,
+    createdAt()
+'''
+          if old not in s:
+              raise SystemExit("Expected createStudent binding block not found")
+          p.write_text(s.replace(old, new, 1))
+          PY
+
       - name: Verify Expo project
         run: |
           test -f package.json
