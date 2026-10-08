@@ -183,11 +183,28 @@ jobs:
           retention-days: 2
           if-no-files-found: error
 
-      - name: Build Student Command Center
-        run: python3 scripts/patch_student_command_center.py
+      - name: Apply NANELSH design patches
+        run: |
+          set +e
+          python3 scripts/patch_student_command_center.py 2>&1 | tee student_patch.log
+          student_status=${PIPESTATUS[0]}
+          python3 scripts/patch_nanelsh_rebrand.py 2>&1 | tee rebrand_patch.log
+          rebrand_status=${PIPESTATUS[0]}
+          echo "student_status=${student_status}"
+          echo "rebrand_status=${rebrand_status}"
+          if [ "${student_status}" -ne 0 ] || [ "${rebrand_status}" -ne 0 ]; then exit 1; fi
 
-      - name: Apply NANELSH Signature visual identity
-        run: python3 scripts/patch_nanelsh_rebrand.py
+      - name: Save patch diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NANELSH-patch-diagnostics
+          path: |
+            student_patch.log
+            rebrand_patch.log
+            App.tsx
+          retention-days: 2
+          if-no-files-found: warn
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
