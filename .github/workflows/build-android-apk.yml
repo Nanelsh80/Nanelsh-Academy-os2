@@ -149,10 +149,10 @@ jobs:
           if hero_end < 0:
               raise SystemExit('Hero actions section is incomplete')
           hero = s[hero_start:hero_end]
-          hero_new = re.sub(r'(<AppButton\\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="outline"', r'\\1tone="soft"', hero)
+          hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="outline"', r'\1tone="soft"', hero)
           if hero_new == hero:
               # If the source already has a different tone, force a filled high-contrast button.
-              hero_new = re.sub(r'(<AppButton\\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="[^"]+"', r'\\1tone="soft"', hero)
+              hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="[^"]+"', r'\1tone="soft"', hero)
           if hero_new == hero and 'title="إضافة طالبة"' not in hero:
               raise SystemExit('Add-student action not found inside hero')
           s = s[:hero_start] + hero_new + s[hero_end:]
@@ -166,7 +166,7 @@ jobs:
           if map_start < 0:
               raise SystemExit('Navigation tabs map not found')
           if 'style={styles.tabBarScroll}' not in s[tab_start:map_start]:
-              s = s[:map_start] + '<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBarScroll} contentContainerStyle={styles.tabBarContent}>\\n        ' + s[map_start:]
+              s = s[:map_start] + '<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBarScroll} contentContainerStyle={styles.tabBarContent}>\n        ' + s[map_start:]
           map_end = s.find('        })}', map_start)
           if map_end < 0:
               raise SystemExit('Navigation tabs map end not found')
@@ -174,8 +174,8 @@ jobs:
           if wrapper_end < 0:
               raise SystemExit('Navigation wrapper end not found')
           if '</ScrollView>' not in s[map_end:wrapper_end]:
-              s = s[:wrapper_end] + '</ScrollView>\\n      ' + s[wrapper_end:]
-          style_pattern = r'  tabBar: \\{[^\\n]*\\}, tabItem: \\{[^\\n]*\\}, tabIcon: \\{[^\\n]*\\}, tabIconSelected: \\{[^\\n]*\\}, tabText: \\{[^\\n]*\\}, tabTextSelected: \\{[^\\n]*\\},'
+              s = s[:wrapper_end] + '</ScrollView>\n      ' + s[wrapper_end:]
+          style_pattern = r'  tabBar: \{[^\n]*\}, tabItem: \{[^\n]*\}, tabIcon: \{[^\n]*\}, tabIconSelected: \{[^\n]*\}, tabText: \{[^\n]*\}, tabTextSelected: \{[^\n]*\},'
           new_styles = '  tabBar: { minHeight: 84, paddingHorizontal: 2, paddingTop: 5, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabBarScroll: { flex: 1 }, tabBarContent: { flexDirection: "row-reverse", alignItems: "center", paddingHorizontal: 3, gap: 2 }, tabItem: { alignItems: "center", justifyContent: "center", width: 68, flexGrow: 0, flexShrink: 0, gap: 3, paddingTop: 1 }, tabIcon: { width: 40, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, lineHeight: 12, fontWeight: "700", textAlign: "center", width: 66 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
           s2, count = re.subn(style_pattern, new_styles, s, count=1)
           if count == 0 and 'tabBarScroll:' not in s2:
