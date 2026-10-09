@@ -88,7 +88,7 @@ jobs:
           d['expo']['version'] = '2.3.4'
           d['expo']['android']['versionCode'] = 11
           d['expo']['android']['adaptiveIcon']['backgroundColor'] = '#F4EBDD'
-          p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\\n')
+          p.write_text(json.dumps(d, ensure_ascii=False, indent=2))
           print('Generated launcher icons from full NANELSH logo with Android-safe padding')
           PY
 
