@@ -87,12 +87,6 @@ jobs:
           open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\\n')
           print('Launcher icon refreshed from approved NANELSH N logo')
           PY
-          d=json.load(open(p))
-          d['expo']['version']='2.3.2'
-          d['expo']['android']['versionCode']=9
-          d['expo']['android']['adaptiveIcon']['backgroundColor']='#F4EBDD'
-          open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
-          PY
 
       - name: Fix bottom navigation safe area
         run: |
