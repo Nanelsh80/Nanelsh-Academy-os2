@@ -149,10 +149,10 @@ jobs:
           if hero_end < 0:
               raise SystemExit('Hero actions section is incomplete')
           hero = s[hero_start:hero_end]
-          hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="outline"', r'\1tone="soft"', hero)
+          hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="outline"', r'\1tone="primary"', hero)
           if hero_new == hero:
               # If the source already has a different tone, force a filled high-contrast button.
-              hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="[^"]+"', r'\1tone="soft"', hero)
+              hero_new = re.sub(r'(<AppButton\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="[^"]+"', r'\1tone="primary"', hero)
           if hero_new == hero and 'title="إضافة طالبة"' not in hero:
               raise SystemExit('Add-student action not found inside hero')
           s = s[:hero_start] + hero_new + s[hero_end:]
