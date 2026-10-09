@@ -84,7 +84,7 @@ jobs:
           d['expo']['version']='2.3.3'
           d['expo']['android']['versionCode']=10
           d['expo']['android']['adaptiveIcon']['backgroundColor']='#F4EBDD'
-          open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\\n')
+          open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2))
           print('Launcher icon refreshed from approved NANELSH N logo')
           PY
 
