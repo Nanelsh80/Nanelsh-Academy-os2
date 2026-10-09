@@ -160,12 +160,12 @@ jobs:
               s = s.replace(old_close, new_close, 1)
           elif 'style={styles.tabBarScroll}' in s and '</ScrollView>' not in s[s.index('style={styles.tabBarScroll}'):s.index('<StudentSheet')]:
               raise SystemExit('Bottom navigation closing anchor not found')
-          old_styles = 'tabBar: { flexDirection: "row-reverse", minHeight: 92, paddingHorizontal: 4, paddingTop: 5, paddingBottom: 12, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: "space-around", shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabItem: { alignItems: "center", justifyContent: "flex-start", flex: 1, minWidth: 40, paddingTop: 1, gap: 4 }, tabIcon: { width: 37, height: 29, borderRadius: 11, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, fontWeight: "700", lineHeight: 13, textAlign: "center" }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
+          style_start = s.find('  tabBar: {')
+          style_end = s.find(' metricsGrid:', style_start)
+          if style_start < 0 or style_end < 0:
+              raise SystemExit('Bottom navigation style range not found')
           new_styles = 'tabBar: { minHeight: 84, paddingHorizontal: 2, paddingTop: 5, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabBarScroll: { flex: 1 }, tabBarContent: { flexDirection: "row-reverse", alignItems: "center", paddingHorizontal: 3, gap: 2 }, tabItem: { alignItems: "center", justifyContent: "center", width: 68, flexGrow: 0, flexShrink: 0, gap: 3, paddingTop: 1 }, tabIcon: { width: 40, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, lineHeight: 12, fontWeight: "700", textAlign: "center", width: 66 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
-          if old_styles in s:
-              s = s.replace(old_styles, new_styles, 1)
-          elif 'tabBarScroll:' not in s:
-              raise SystemExit('Bottom navigation style anchor not found')
+          s = s[:style_start] + '  ' + new_styles + s[style_end:]
           p.write_text(s)
           print('Fixed hero button contrast and made all navigation labels reachable by horizontal swipe')
           PY
