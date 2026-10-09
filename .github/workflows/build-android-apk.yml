@@ -96,6 +96,38 @@ jobs:
         run: |
           python3 -c "from pathlib import Path; p=Path('src/data/store.ts'); s=p.read_text(); old='    input.totalSessions ?? 0,\\n    input.remainingSessions ?? input.totalSessions ?? 0,\\n    input.notes?.trim() || null,\\n    createdAt()\\n'; new='    input.totalSessions ?? 0,\\n    0,\\n    input.remainingSessions ?? input.totalSessions ?? 0,\\n    input.notes?.trim() || null,\\n    createdAt()\\n'; assert old in s, 'Expected createGroup binding block not found'; p.write_text(s.replace(old,new,1))"
 
+      - name: Fix dashboard hero empty control and bottom navigation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("App.tsx")
+          s=p.read_text()
+          # Remove only an empty outlined hero control when its exact JSX pattern is present.
+          candidates=[
+              '<View style={styles.heroEmptyButton}></View>',
+              '<View style={styles.heroEmptyButton} />',
+              '<Pressable style={styles.heroEmptyButton}></Pressable>',
+              '<Pressable style={styles.heroEmptyButton} />',
+          ]
+          for old in candidates:
+              s=s.replace(old, '')
+          # Prevent a wide, fixed-width bottom bar from forcing labels to clip.
+          s=s.replace(
+              'tabBar: { flexDirection: "row-reverse", minHeight: 78, paddingHorizontal: 4, paddingTop: 7, paddingBottom: 8, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: "space-around", shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 },',
+              'tabBar: { flexDirection: "row-reverse", minHeight: 96, paddingHorizontal: 2, paddingTop: 5, paddingBottom: 10, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: "space-between", shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 },'
+          )
+          s=s.replace(
+              'tabItem: { alignItems: "center", justifyContent: "center", flex: 1, minWidth: 40, gap: 3 },',
+              'tabItem: { alignItems: "center", justifyContent: "flex-start", flex: 1, minWidth: 0, paddingHorizontal: 1, paddingTop: 1, gap: 4 },'
+          )
+          s=s.replace(
+              'tabText: { color: COLORS.muted, fontSize: 8, fontWeight: "700" }, tabTextSelected: { color: COLORS.primaryDeep },',
+              'tabText: { color: COLORS.muted, fontSize: 8, lineHeight: 11, fontWeight: "700", textAlign: "center", flexShrink: 1 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
+          )
+          p.write_text(s)
+          print("Applied safe targeted dashboard/nav fixes")
+          PY
+
       - name: Verify Expo project
         run: |
           test -f package.json
