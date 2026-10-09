@@ -161,7 +161,7 @@ jobs:
           elif 'style={styles.tabBarScroll}' in s and '</ScrollView>' not in s[s.index('style={styles.tabBarScroll}'):s.index('<StudentSheet')]:
               raise SystemExit('Bottom navigation closing anchor not found')
           style_start = s.find('  tabBar: {')
-          style_end = s.find(' metricsGrid:', style_start)
+          style_end = s.find('\n});', style_start)
           if style_start < 0 or style_end < 0:
               raise SystemExit('Bottom navigation style range not found')
           new_styles = 'tabBar: { minHeight: 84, paddingHorizontal: 2, paddingTop: 5, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabBarScroll: { flex: 1 }, tabBarContent: { flexDirection: "row-reverse", alignItems: "center", paddingHorizontal: 3, gap: 2 }, tabItem: { alignItems: "center", justifyContent: "center", width: 68, flexGrow: 0, flexShrink: 0, gap: 3, paddingTop: 1 }, tabIcon: { width: 40, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, lineHeight: 12, fontWeight: "700", textAlign: "center", width: 66 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
