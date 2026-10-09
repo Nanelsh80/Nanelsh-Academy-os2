@@ -44,9 +44,49 @@ jobs:
           test -f assets/android-icon-foreground.png
           test -f assets/android-icon-background.png
           test -f assets/android-icon-monochrome.png
+          python3 -m pip install --quiet pillow
           python3 - <<'PY'
-          import json
+          from pathlib import Path
+          from PIL import Image
+          import json, shutil
+          source = Path('assets/nanelsh-app-icon.png')
+          assert source.exists(), 'Approved NANELSH N logo is missing'
+          # Keep Expo's regular icon and Android adaptive foreground on the approved N logo.
+          shutil.copyfile(source, 'assets/icon.png')
+          shutil.copyfile(source, 'assets/android-icon-foreground.png')
+          logo = Image.open(source).convert('RGBA')
+          # Refresh checked-in Android launcher resources too; this project builds the native
+          # android/ directory directly, so changing app.json alone is not enough.
+          sizes = {'mdpi':48, 'hdpi':72, 'xhdpi':96, 'xxhdpi':144, 'xxxhdpi':192}
+          for density, size in sizes.items():
+              folder = Path('android/app/src/main/res') / f'mipmap-{density}'
+              folder.mkdir(parents=True, exist_ok=True)
+              image = logo.resize((size, size), Image.Resampling.LANCZOS)
+              for name in ('ic_launcher.webp', 'ic_launcher_round.webp', 'ic_launcher_foreground.webp'):
+                  image.save(folder / name, 'WEBP', quality=100, lossless=True)
+          # Generate a themed-icon silhouette from the logo, not the old atom artwork.
+          import numpy as np
+          pixels = np.array(logo.convert('RGB')).astype('int16')
+          corner = pixels[0, 0]
+          distance = np.sqrt(((pixels - corner) ** 2).sum(axis=2))
+          alpha = np.clip((distance - 18) * 4, 0, 255).astype('uint8')
+          mono = Image.new('RGBA', logo.size, (255,255,255,0))
+          mono.putalpha(Image.fromarray(alpha, mode='L'))
+          mono.save('assets/android-icon-monochrome.png')
+          for density, size in sizes.items():
+              folder = Path('android/app/src/main/res') / f'mipmap-{density}'
+              mono.resize((size, size), Image.Resampling.LANCZOS).save(folder / 'ic_launcher_monochrome.webp', 'WEBP', quality=100, lossless=True)
           p='app.json'
+          d=json.load(open(p))
+          d['expo']['icon']='./assets/nanelsh-app-icon.png'
+          d['expo']['android']['adaptiveIcon']['foregroundImage']='./assets/android-icon-foreground.png'
+          d['expo']['android']['adaptiveIcon']['monochromeImage']='./assets/android-icon-monochrome.png'
+          d['expo']['version']='2.3.3'
+          d['expo']['android']['versionCode']=10
+          d['expo']['android']['adaptiveIcon']['backgroundColor']='#F4EBDD'
+          open(p,'w').write(json.dumps(d,ensure_ascii=False,indent=2)+'\\n')
+          print('Launcher icon refreshed from approved NANELSH N logo')
+          PY
           d=json.load(open(p))
           d['expo']['version']='2.3.2'
           d['expo']['android']['versionCode']=9
