@@ -138,36 +138,51 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path('App.tsx')
           s = p.read_text()
-          # The outline button used dark teal text on the dark teal hero background.
-          old = '<AppButton title="إضافة طالبة" icon="person-add-alt-1" onPress={() => onOpen("student")} tone="outline" compact />'
-          new = '<AppButton title="إضافة طالبة" icon="person-add-alt-1" onPress={() => onOpen("student")} tone="soft" compact />'
-          if old in s:
-              s = s.replace(old, new, 1)
-          elif new not in s:
-              raise SystemExit('Hero add-student button anchor not found')
-          # Eleven tabs cannot be legible when squeezed into one phone-width row.
-          old_open = '<View style={[styles.tabBar, { paddingBottom: Math.max(12, insets.bottom + 8), minHeight: 92 + insets.bottom }]}>' + '\n        {TABS.map(tab => {'
-          new_open = '<View style={[styles.tabBar, { paddingBottom: Math.max(12, insets.bottom + 8), minHeight: 84 + insets.bottom }]}>' + '\n        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBarScroll} contentContainerStyle={styles.tabBarContent}>' + '\n        {TABS.map(tab => {'
-          if old_open in s:
-              s = s.replace(old_open, new_open, 1)
-          elif 'style={styles.tabBarScroll}' not in s:
-              raise SystemExit('Bottom navigation opening anchor not found')
-          old_close = '        })}' + '\n      </View>' + '\n      <StudentSheet'
-          new_close = '        })}' + '\n        </ScrollView>' + '\n      </View>' + '\n      <StudentSheet'
-          if old_close in s:
-              s = s.replace(old_close, new_close, 1)
-          elif 'style={styles.tabBarScroll}' in s and '</ScrollView>' not in s[s.index('style={styles.tabBarScroll}'):s.index('<StudentSheet')]:
-              raise SystemExit('Bottom navigation closing anchor not found')
-          style_start = s.find('  tabBar: {')
-          style_end = s.find('\n});', style_start)
-          if style_start < 0 or style_end < 0:
-              raise SystemExit('Bottom navigation style range not found')
-          new_styles = 'tabBar: { minHeight: 84, paddingHorizontal: 2, paddingTop: 5, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabBarScroll: { flex: 1 }, tabBarContent: { flexDirection: "row-reverse", alignItems: "center", paddingHorizontal: 3, gap: 2 }, tabItem: { alignItems: "center", justifyContent: "center", width: 68, flexGrow: 0, flexShrink: 0, gap: 3, paddingTop: 1 }, tabIcon: { width: 40, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, lineHeight: 12, fontWeight: "700", textAlign: "center", width: 66 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
-          s = s[:style_start] + '  ' + new_styles + s[style_end:]
+          # Change the hero action by its visible Arabic label, regardless of prop order.
+          hero_start = s.find('<View style={styles.heroActions}>')
+          if hero_start < 0:
+              raise SystemExit('Hero actions section not found')
+          hero_end = s.find('</View>', hero_start)
+          if hero_end < 0:
+              raise SystemExit('Hero actions section is incomplete')
+          hero = s[hero_start:hero_end]
+          hero_new = re.sub(r'(<AppButton\\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="outline"', r'\\1tone="soft"', hero)
+          if hero_new == hero:
+              # If the source already has a different tone, force a filled high-contrast button.
+              hero_new = re.sub(r'(<AppButton\\b(?=[^>]*title="إضافة طالبة")[^>]*?)tone="[^"]+"', r'\\1tone="soft"', hero)
+          if hero_new == hero and 'title="إضافة طالبة"' not in hero:
+              raise SystemExit('Add-student action not found inside hero')
+          s = s[:hero_start] + hero_new + s[hero_end:]
+          # Make the navigation horizontally scrollable so labels are not squeezed off-screen.
+          tab_start = s.find('<View style={styles.tabBar}>')
+          if tab_start < 0:
+              tab_start = s.find('<View style={[styles.tabBar,')
+          if tab_start < 0:
+              raise SystemExit('Bottom navigation container not found')
+          map_start = s.find('{TABS.map(tab => {', tab_start)
+          if map_start < 0:
+              raise SystemExit('Navigation tabs map not found')
+          if 'style={styles.tabBarScroll}' not in s[tab_start:map_start]:
+              s = s[:map_start] + '<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBarScroll} contentContainerStyle={styles.tabBarContent}>\\n        ' + s[map_start:]
+          map_end = s.find('        })}', map_start)
+          if map_end < 0:
+              raise SystemExit('Navigation tabs map end not found')
+          wrapper_end = s.find('</View>', map_end)
+          if wrapper_end < 0:
+              raise SystemExit('Navigation wrapper end not found')
+          if '</ScrollView>' not in s[map_end:wrapper_end]:
+              s = s[:wrapper_end] + '</ScrollView>\\n      ' + s[wrapper_end:]
+          style_pattern = r'  tabBar: \\{[^\\n]*\\}, tabItem: \\{[^\\n]*\\}, tabIcon: \\{[^\\n]*\\}, tabIconSelected: \\{[^\\n]*\\}, tabText: \\{[^\\n]*\\}, tabTextSelected: \\{[^\\n]*\\},'
+          new_styles = '  tabBar: { minHeight: 84, paddingHorizontal: 2, paddingTop: 5, backgroundColor: "#FBF6ED", borderTopWidth: 1, borderTopColor: COLORS.border, shadowColor: "#6B6257", shadowOpacity: 0.08, shadowOffset: { width: 0, height: -4 }, shadowRadius: 10, elevation: 8 }, tabBarScroll: { flex: 1 }, tabBarContent: { flexDirection: "row-reverse", alignItems: "center", paddingHorizontal: 3, gap: 2 }, tabItem: { alignItems: "center", justifyContent: "center", width: 68, flexGrow: 0, flexShrink: 0, gap: 3, paddingTop: 1 }, tabIcon: { width: 40, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" }, tabIconSelected: { backgroundColor: COLORS.lavender }, tabText: { color: COLORS.muted, fontSize: 9, lineHeight: 12, fontWeight: "700", textAlign: "center", width: 66 }, tabTextSelected: { color: COLORS.primaryDeep, fontWeight: "900" },'
+          s2, count = re.subn(style_pattern, new_styles, s, count=1)
+          if count == 0 and 'tabBarScroll:' not in s2:
+              raise SystemExit('Navigation styles not found')
+          s = s2
           p.write_text(s)
-          print('Fixed hero button contrast and made all navigation labels reachable by horizontal swipe')
+          print('Hero action contrast and horizontally scrollable navigation applied')
           PY
 
       - name: Verify Expo project
