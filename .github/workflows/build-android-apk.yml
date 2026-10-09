@@ -65,13 +65,13 @@ jobs:
               for name in ('ic_launcher.webp', 'ic_launcher_round.webp', 'ic_launcher_foreground.webp'):
                   image.save(folder / name, 'WEBP', quality=100, lossless=True)
           # Generate a themed-icon silhouette from the logo, not the old atom artwork.
-          import numpy as np
-          pixels = np.array(logo.convert('RGB')).astype('int16')
-          corner = pixels[0, 0]
-          distance = np.sqrt(((pixels - corner) ** 2).sum(axis=2))
-          alpha = np.clip((distance - 18) * 4, 0, 255).astype('uint8')
+          from PIL import ImageChops
+          corner = logo.getpixel((0, 0))[:3]
+          background = Image.new('RGB', logo.size, corner)
+          difference = ImageChops.difference(logo.convert('RGB'), background).convert('L')
+          alpha = difference.point(lambda value: 0 if value < 18 else min(255, (value - 18) * 4))
           mono = Image.new('RGBA', logo.size, (255,255,255,0))
-          mono.putalpha(Image.fromarray(alpha, mode='L'))
+          mono.putalpha(alpha)
           mono.save('assets/android-icon-monochrome.png')
           for density, size in sizes.items():
               folder = Path('android/app/src/main/res') / f'mipmap-{density}'
